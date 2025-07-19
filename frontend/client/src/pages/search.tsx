@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { SkillsInput } from "@/components/skills-input";
+import { LoadingScreen } from "@/components/loading-screen";
 import { useLocation } from "wouter";
 import { searchFormSchema, type SearchForm } from "@shared/schema";
 import { LOCATIONS, EXPERIENCE_LEVELS, PROJECT_DATE_OPTIONS } from "@/lib/constants";
@@ -14,6 +15,7 @@ import { LOCATIONS, EXPERIENCE_LEVELS, PROJECT_DATE_OPTIONS } from "@/lib/consta
 export default function SearchPage() {
   const [, navigate] = useLocation();
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SearchForm>({
     resolver: zodResolver(searchFormSchema),
@@ -26,19 +28,28 @@ export default function SearchPage() {
     },
   });
 
-  const onSubmit = (data: SearchForm) => {
+  const onSubmit = async (data: SearchForm) => {
     const searchData = {
       ...data,
       skills: selectedSkills,
     };
     
+    setIsLoading(true);
+    
     // Store search data in localStorage for results page
     localStorage.setItem('searchQuery', JSON.stringify(searchData));
-    navigate('/results');
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate('/results');
+    }, 4000);
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
+    <>
+      <LoadingScreen isVisible={isLoading} />
+      <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 gradient-text">
@@ -166,6 +177,16 @@ export default function SearchPage() {
                         </FormItem>
                       )}
                     />
+
+                    {/* Category/Field */}
+                    <div className="md:col-span-2">
+                      <FormLabel className="font-medium mb-2 block">Category/Field of Interest</FormLabel>
+                      <input
+                        type="text"
+                        placeholder="e.g., Healthcare, Finance, AI/ML, Gaming..."
+                        className="w-full px-3 py-2 bg-[hsl(217,33%,17%)] border border-[hsl(195,100%,50%)]/30 rounded-md text-white placeholder-gray-400 focus:border-[hsl(195,100%,50%)] focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -186,5 +207,6 @@ export default function SearchPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -103,6 +103,12 @@
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
+
+  .animate-slide-in {
+    animation: slideIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
 }
 
 @keyframes float {
@@ -123,4 +129,11 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }

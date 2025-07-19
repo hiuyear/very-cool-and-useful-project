@@ -102,12 +102,17 @@ export default function Results() {
 
         {/* Results Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {MOCK_DEVELOPERS.map((developer) => (
-            <DeveloperCard
+          {MOCK_DEVELOPERS.map((developer, index) => (
+            <div
               key={developer.id}
-              developer={developer}
-              onClick={() => setSelectedDeveloper(developer)}
-            />
+              className="animate-slide-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <DeveloperCard
+                developer={developer}
+                onClick={() => setSelectedDeveloper(developer)}
+              />
+            </div>
           ))}
         </div>
 
