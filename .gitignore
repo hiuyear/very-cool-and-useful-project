@@ -205,3 +205,35 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ─── Frontend: Node.js / Vite / React ────────────────
+
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+.vite/
+.turbo/
+.next/
+
+# local env
+.env
+.env.*
+
+# IDE / system files
+.DS_Store
+.vscode/
+
+# Vercel output
+.vercel/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# package managers
+package-lock.json
