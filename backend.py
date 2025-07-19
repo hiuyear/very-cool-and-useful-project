@@ -100,7 +100,8 @@ def price():
 
     #call function to pass data to lewis code
 
-    
+    #prompt: "text"
+    #tools: "tool list"
     
 
     
