@@ -18,9 +18,6 @@ export function Navigation() {
               How it Works
             </a>
             <a href="#" className="text-gray-300 hover:text-[hsl(195,100%,50%)] transition-colors">
-              Pricing
-            </a>
-            <a href="#" className="text-gray-300 hover:text-[hsl(195,100%,50%)] transition-colors">
               About
             </a>
             <Button className="bg-[hsl(195,100%,50%)] text-[hsl(222,84%,5%)] hover:bg-[hsl(195,100%,50%)]/80">

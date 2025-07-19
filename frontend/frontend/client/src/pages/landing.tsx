@@ -24,6 +24,11 @@ export default function Landing() {
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
               AI-powered platform that connects you with skilled developers who have proven experience in your exact use case
             </p>
+            <div className="bg-[hsl(217,33%,17%)]/30 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-300">
+                Find previously done hackathon projects and hire people who have expertise already
+              </p>
+            </div>
             <Button
               size="lg"
               className="bg-gradient-to-r from-[hsl(195,100%,50%)] to-[hsl(158,64%,52%)] text-[hsl(222,84%,5%)] px-12 py-4 text-lg font-bold hover:scale-105 transition-transform animate-glow"
@@ -54,7 +59,7 @@ export default function Landing() {
               <Brain className="text-[hsl(158,64%,52%)] text-4xl mb-4 mx-auto h-16 w-16" />
               <h3 className="text-xl font-semibold mb-4">AI-Powered Matching</h3>
               <p className="text-gray-300">
-                We analyze hackathon projects to find developers with proven experience.
+                We analyze hackathon projects and provide a rating for developers with proven experience, based on potential and compatibility with your project.
               </p>
             </div>
             <div className="card-holographic rounded-2xl p-8 text-center">
