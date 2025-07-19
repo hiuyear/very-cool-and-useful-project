@@ -109,6 +109,10 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
+  .animate-walk {
+    animation: walk 0.4s ease-in-out infinite;
+  }
 }
 
 @keyframes float {
@@ -136,4 +140,9 @@
     opacity: 1; 
     transform: translateY(0); 
   }
+}
+
+@keyframes walk {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
 }

@@ -1,6 +1,7 @@
 import { Rocket, Search, Brain, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { DevHuntLogo } from "@/components/logo";
 
 export default function Landing() {
   const [, navigate] = useLocation();
