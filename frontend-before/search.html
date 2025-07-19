@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search | Devpost Talent Finder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tag {
+      @apply bg-gray-200 text-sm px-3 py-1 rounded-full flex items-center gap-1;
+    }
+    .suggestion {
+      @apply cursor-pointer px-3 py-1 hover:bg-gray-100;
+    }
+  </style>
+</head>
+<body class="bg-[#f7f5f2] text-gray-900 font-sans min-h-screen p-8">
+
+  <div class="max-w-2xl mx-auto mt-24">
+    <h1 class="text-2xl font-bold mb-6">Enter what you're looking for</h1>
+
+    <!-- Search Bar -->
+    <input
+      id="mainQuery"
+      type="text"
+      placeholder="Enter project plans, location, etc."
+      class="w-full mb-4 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+    />
+
+    <!-- Toggle Filters -->
+    <div class="mb-4">
+      <button id="toggleFilters" class="text-sm text-gray-600 underline">Search by filters instead</button>
+    </div>
+
+    <!-- Always-visible Search Button -->
+    <div class="mb-6">
+      <button id="basicSearchBtn" class="bg-black text-white px-8 py-3 rounded-full text-lg hover:bg-gray-800 transition">
+        Search
+      </button>
+    </div>
+
+    <!-- Filters Section -->
+    <div id="filtersSection" class="hidden space-y-6 border-t border-gray-300 pt-6">
+
+      <!-- Skills -->
+      <div>
+        <label class="block text-lg font-semibold mb-2">Skills (min 3)</label>
+        <div id="skill-container" class="flex flex-wrap items-center gap-2 border-2 border-red-500 rounded-md px-3 py-2 transition-colors">
+          <!-- Tags go here -->
+          <input
+            id="skill-input"
+            type="text"
+            placeholder="Type a skill"
+            class="flex-grow focus:outline-none bg-transparent min-w-[120px]"
+            autocomplete="off"
+          />
+        </div>
+        <div id="suggestions" class="border border-gray-300 rounded-md mt-1 hidden bg-white shadow-md"></div>
+        <p id="skill-warning" class="text-red-600 text-sm mt-1">Select at least 3 skills</p>
+      </div>
+
+      <!-- Location -->
+      <div>
+        <label for="location" class="block text-lg font-semibold mb-2">Location</label>
+        <select id="location" class="w-full p-3 border border-gray-300 rounded-lg">
+          <option value="">Select a city</option>
+          <option>New York</option>
+          <option>San Francisco</option>
+          <option>London</option>
+          <option>Toronto</option>
+          <option>Berlin</option>
+          <option>Singapore</option>
+          <option>Sydney</option>
+          <option>Tokyo</option>
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="flex gap-4">
+        <div class="w-1/2">
+          <label for="start-date" class="block text-lg font-semibold mb-2">From</label>
+          <input type="date" id="start-date" class="w-full p-3 border border-gray-300 rounded-lg">
+        </div>
+        <div class="w-1/2">
+          <label for="end-date" class="block text-lg font-semibold mb-2">To</label>
+          <input type="date" id="end-date" class="w-full p-3 border border-gray-300 rounded-lg">
+        </div>
+      </div>
+
+      <!-- Filtered Search Button -->
+      <div class="mt-4">
+        <button class="bg-black text-white px-8 py-4 rounded-full text-lg hover:bg-gray-800 transition">
+          Search with Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const skillContainer = document.getElementById('skill-container');
+    const input = document.getElementById('skill-input');
+    const warning = document.getElementById('skill-warning');
+    const suggestionsBox = document.getElementById('suggestions');
+
+    let skills = [];
+    const allSuggestions = ["Python", "JavaScript", "React", "Flask", "Tailwind", "SQL", "Node.js", "Django", "Pandas", "TensorFlow"];
+
+    input.addEventListener('input', function () {
+      const value = input.value.trim().toLowerCase();
+      suggestionsBox.innerHTML = '';
+      if (value) {
+        const matches = allSuggestions.filter(skill =>
+          skill.toLowerCase().startsWith(value) && !skills.includes(skill)
+        );
+        matches.forEach(skill => {
+          const div = document.createElement('div');
+          div.textContent = skill;
+          div.className = 'suggestion';
+          div.onclick = () => {
+            addSkill(skill);
+            input.value = '';
+            suggestionsBox.classList.add('hidden');
+          };
+          suggestionsBox.appendChild(div);
+        });
+        suggestionsBox.classList.toggle('hidden', matches.length === 0);
+      } else {
+        suggestionsBox.classList.add('hidden');
+      }
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && input.value.trim()) {
+        e.preventDefault();
+        addSkill(input.value.trim());
+        input.value = '';
+        suggestionsBox.classList.add('hidden');
+      }
+    });
+
+    function addSkill(value) {
+      if (!skills.includes(value)) {
+        skills.push(value);
+        const tag = document.createElement('span');
+        tag.className = "tag";
+        tag.innerHTML = `${value} <button class="text-red-500 font-bold" onclick="removeSkill('${value}', this)">×</button>`;
+        skillContainer.insertBefore(tag, input);
+        validateSkills();
+      }
+    }
+
+    function removeSkill(value, btn) {
+      skills = skills.filter(s => s !== value);
+      btn.parentElement.remove();
+      validateSkills();
+    }
+
+    function validateSkills() {
+      if (skills.length < 3) {
+        skillContainer.classList.add('border-red-500');
+        skillContainer.classList.remove('border-green-500');
+        warning.classList.remove('hidden');
+      } else {
+        skillContainer.classList.remove('border-red-500');
+        skillContainer.classList.add('border-green-500');
+        warning.classList.add('hidden');
+      }
+    }
+
+    // Toggle filter section
+    document.getElementById("toggleFilters").addEventListener("click", () => {
+      const section = document.getElementById("filtersSection");
+      section.classList.toggle("hidden");
+    });
+
+    // Basic search button
+    document.getElementById("basicSearchBtn").addEventListener("click", () => {
+      const query = document.getElementById("mainQuery").value.trim();
+      if (!query) return alert("Please enter a search query.");
+      const payload = { query, filtersUsed: false };
+      console.log("🔍 Basic Search Payload:", payload);
+      // TODO: Send this to backend
+    });
+
+    // Filtered search (with validation)
+    document.querySelector(".bg-black.text-white.px-8.py-4").addEventListener("click", () => {
+      if (skills.length < 3) {
+        alert("Please select at least 3 skills.");
+        return;
+      }
+
+      const payload = {
+        query: document.getElementById("mainQuery").value.trim(),
+        filtersUsed: true,
+        skills,
+        location: document.getElementById("location").value,
+        startDate: document.getElementById("start-date").value,
+        endDate: document.getElementById("end-date").value
+      };
+
+      console.log("🎯 Filtered Search Payload:", payload);
+      // TODO: Send this to backend
+    });
+  </script>
+</body>
+</html>
+

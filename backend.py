@@ -3,6 +3,9 @@ import requests
 from google import genai
 from google.genai import types
 
+
+
+
 GEMINI_API_KEY="AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -100,6 +103,7 @@ def price():
 
     #call function to pass data to lewis code
 
+    
     #prompt: "text"
     #tools: "tool list"
     
