@@ -1,39 +1,31 @@
+# app.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # ✅ allow all origins by default
+CORS(app)  # allow your React app (via Vite proxy) to talk to Flask
 
-@app.route("/findhacker", methods=["POST"])
+@app.route("/findHacker", methods=["POST"])
 def find_hacker():
-    data = request.get_json()
-    return jsonify({
-        "tools": data.get("tools", []),
-        "domains": ["AI", "Web"],
-        "skills": ["React", "Node.js"],
-    })
+    # 1. Grab the JSON payload from the frontend
+    data = request.get_json() or {}
+    prompt = data.get("prompt", "")
+    tools  = data.get("tools", [])
 
-@app.route("/summarizeCandidates", methods=["POST"])
-def summarize():
-    rows = request.get_json().get("data", [])
-    results = []
-    for row in rows:
-        name = row[0]
-        projects = row[1:]
-        results.append({
-            "name": name,
-            "detailedSummary": f"{name} has worked on: {', '.join(projects)}"
-        })
-    return jsonify(results)
+    # 2. YOUR LOGIC HERE: call Gemini, query DB, scrape Devpost, etc.
+    #    and build two lists: `domains` and `skills`
+    #
+    #    For example purposes, let’s just echo back:
+    response = {
+        "domains": ["exampleDomain1", "exampleDomain2"],
+        "skills":  ["exampleSkillA", "exampleSkillB"],
+        # you can also include any other fields your DeveloperCard needs
+    }
 
-@app.route("/profile")
-def profile():
-    url = request.args.get("url")
-    return jsonify({
-        "github": f"https://github.com/{url.split('/')[-1]}",
-        "linkedin": f"https://linkedin.com/in/{url.split('/')[-1]}",
-        "location": "Toronto, Canada"
-    })
+    # 3. Return it as JSON
+    return jsonify(response)
+
 
 if __name__ == "__main__":
-    app.run(port=5001)
+    # this lets you run `python app.py` directly
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -47,7 +47,7 @@ app.post("/api/developers", async (req, res) => {
 
     // Step 1: Call Flask to extract filters
     console.log("→ Calling Flask /findhacker...");
-    const { data: fbData } = await axios.post("http://127.0.0.1:5001/findhacker", { prompt, tools });
+    const { data: fbData } = await axios.post("http://127.0.0.1:5000/findhacker", { prompt, tools });
     const filters = Array.isArray(fbData) ? fbData[0] : fbData;
     console.log("✓ Filters received:", filters);
 
@@ -97,7 +97,7 @@ app.post("/api/developers", async (req, res) => {
     ]);
 
     console.log("→ Calling Flask /summarizeCandidates...");
-    const { data: summaries } = await axios.post("http://127.0.0.1:5001/summarizeCandidates", {
+    const { data: summaries } = await axios.post("http://127.0.0.1:5000/summarizeCandidates", {
       data: summaryRows,
     });
     console.log("✓ Summaries received.");
@@ -110,7 +110,7 @@ app.post("/api/developers", async (req, res) => {
       try {
         console.log(`→ Scraping profile for ${dev.name}`);
         const { data: profileInfo } = await axios.get(
-          `http://127.0.0.1:5001/profile?url=${encodeURIComponent(dev.profile)}`
+          `http://127.0.0.1:5000/profile?url=${encodeURIComponent(dev.profile)}`
         );
         dev.githubUrl = profileInfo.github || "";
         dev.linkedinUrl = profileInfo.linkedin || "";

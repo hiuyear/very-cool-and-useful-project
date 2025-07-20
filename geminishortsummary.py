@@ -12,7 +12,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("Please set the GEMINI_API_KEY environment variable")
 
-MAX_CANDIDATES = 10
+MAX_CANDIDATES = 10https://chatgpt.com/gpts
 MAX_RETRIES = 2
 RETRY_BACKOFF_BASE = 0.5  # seconds
 
