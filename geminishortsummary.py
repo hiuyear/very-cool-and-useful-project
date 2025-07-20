@@ -30,7 +30,7 @@ SUMMARY_PROMPT = """
 You are an expert career summarizer. You are going to recieve information on a candidate with information such as their projects and names of them.
 
 
-Write a concise, two-to-three‑sentence summary of their expertise and background.
+Write a concise, two-to-three‑sentence summary of their expertise and background. Also write one to two sentences on the project they made.
 """
 
 def call_gemini(projects_text: str) -> str:
