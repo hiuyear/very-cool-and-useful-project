@@ -1,4 +1,4 @@
-// vite.config.js
+// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -14,13 +14,21 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // forward any call to /findHacker → Flask on 5000
+      // Point all /api/* calls to your Express backend on 3000
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+      // If you still need to hit Flask for other routes:
       "/findHacker": {
         target: "http://localhost:5000",
         changeOrigin: true,
       },
-      // if you later add a /api/search endpoint in Flask:
-      "/api": {
+      "/summarizeCandidates": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+      "/profile": {
         target: "http://localhost:5000",
         changeOrigin: true,
       },
