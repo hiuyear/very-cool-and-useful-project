@@ -3,6 +3,7 @@ from flask_cors import CORS
 from pymongo import MongoClient
 import os
 import json
+from dotenv import load_dotenv
 
 # === Setup ===
 app = Flask(__name__)
