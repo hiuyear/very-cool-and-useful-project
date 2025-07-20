@@ -1,119 +1,97 @@
 from flask import Flask, jsonify, send_from_directory, request
-import requests
 from google import genai
-from google.genai import types
+import json
+from pydantic import BaseModel
 
 
-
-
-GEMINI_API_KEY="AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
+GEMINI_API_KEY = "AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+class hackerData(BaseModel):
+    category: list[str]
+    technical: list[str]   # fixed typo here
+    location: str
+
 PROMPT_TEMPLATE = """
-You are helping a recruiter search for qualified candidates based on two types of input:
 
-1. A natural language prompt. This may describe either:
+You are an AI assistant helping a recruiter search for ideal candidates.
 
-A project the user is currently working on or the type of candidate or experience they are searching for
+You are given a combination of:
+A natural language prompt describing a project or the type of candidate being searched for.
+A list of manually selected tools/frameworks (if any).
 
-A checklist of selected tools, frameworks, skills, or domains
-
-Your job is to extract relevant search keywords to match against a MongoDB collection of project documents with this structure:
-
-{
-"title": string,
-"description": string,
-"built_with": string,
-}
-
-Please return your output as a JSON object with four arrays:
+Your goal is to extract and format relevant search metadata as a Python dictionary with the following structure:
 
 {
-"tools_frameworks": [...], ← used to match against built_with[]
-"skills_capabilities": [...], ← used to match inside title/description
-"domains": [...], ← used to match inside title/description
-
+  "category": [up to 3 field/industry categories or domains relevant to the project, lowercase strings],
+  "technical": [up to 50 total keywords including tools, frameworks, languages, and technical skills required — including manually selected tools],
+  "location": [either a city/region/country string, or null if not mentioned or unknown]
 }
 
-Rules:
+**Return ONLY the JSON object. DO NOT include markdown code blocks, text explanations, or formatting like ```json.**
 
-Do not generate duplicates across lists
-
-Only use the inputs that are present
-
-Match terminology likely to appear in user-generated titles or descriptions
-
-Do not include enhancements or unrelated synonyms
-
-Examples:
+EXAMPLES:
 
 Example 1:
-Natural language prompt: "Find someone who built an AI chatbot for fintech"
-Selected checkboxes: (none)
+Prompt: "We’re looking for someone to help us build a climate dashboard using Next.js, Tailwind, and MongoDB. Based in Vancouver."
 
-Expected output:
+Selected tools: ["Next.js", "Tailwind"]
+
+Expected Output:
 {
-"tools_frameworks": ["Dialogflow", "LangChain", "OpenAI"],
-"skills_capabilities": ["chatbot development", "natural language processing", "prompt engineering"],
-"domains": ["fintech", "banking", "financial services"],
-"related_terms": ["AI assistant", "virtual advisor"]
+  "category": ["climate tech", "data visualization"],
+  "technical": ["next.js", "tailwind", "mongodb", "node.js", "react", "dashboard", "climate api", "chart.js", "d3.js"],
+  "location": "vancouver"
 }
-
-Example 2:
-Natural language prompt: "Currently building a resume screener for HR powered by LLMs"
-Selected checkboxes: ["Pinecone", "LangChain"]
-
-Expected output:
-{
-"tools_frameworks": ["Pinecone", "LangChain"],
-"skills_capabilities": ["semantic search", "LLM integration", "resume analysis"],
-"domains": ["human resources", "recruitment tech"],
-"related_terms": ["candidate screening", "job matching"]
-}
-
 User Input:
 """
 
 def generate_keywords(refinedPrompt):
-    
     response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=f"{PROMPT_TEMPLATE} {refinedPrompt}",
+        model="gemini-2.5-flash",
+        contents=refinedPrompt,
     )
     return response.text
-    
+def parse_markdown_json(text):
+    # Strip markdown-style code block
+    if text.startswith("```json"):
+        text = text[len("```json"):].strip()
+    if text.endswith("```"):
+        text = text[:-3].strip()
 
+    # Now safely parse JSON
+    return json.loads(text)
 
-app=Flask(__name__)
+app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return send_from_directory('.', "search.html")
+    return send_from_directory('.', "home.html")
 
 @app.route("/findHacker", methods=['POST'])
-def price():
-    data=request.get_json()
-    userPrompt=data.get("prompt")
-    selectedTools=data.get("tools")
+def findHacker():
+    data = request.get_json()
+    userPrompt = data.get("prompt", "")
+    selectedTools = data.get("tools", [])
+
+    # Build prompt correctly with PROMPT_TEMPLATE contents + user input
+    refinedPrompt = f"{PROMPT_TEMPLATE}\nNatural language prompt: {userPrompt}\nSelected checkboxes: {selectedTools}"
+
+    response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=refinedPrompt,
+    config={
+        "response_mime_type": "application/json",
+        "response_schema": list[hackerData],}
+    )
+    raw_text = response.text
+    print("Raw Gemini response:", repr(raw_text))
+
+    info: list[hackerData] = response.parsed
+
+    # Serialize parsed Pydantic models to list of dicts and return JSON response
+    return jsonify([r.model_dump() for r in info])
     
-    refinedPrompt=f"PROMPT_TEMPLATE\nNatural language prompt: {userPrompt}\nSelected checkboxes: {selectedTools}"
-    keywords=generate_keywords(refinedPrompt)
-
-
-
-    #call function to pass data to lewis code
-
-    
-    #prompt: "text"
-    #tools: "tool list"
-    
-
-    
-
-    
-    return jsonify({
-        
-    })
 
 if __name__ == "__main__":
     app.run(debug=True)
