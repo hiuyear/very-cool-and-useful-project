@@ -31,10 +31,14 @@ You are an expert career summarizer. You are going to recieve a list of informat
 You will also receive a short prompt from an employer about what candidate they are looking for / what projects they need help with.
 
 
+<<<<<<< HEAD
 Write a concise, two-to-three‑sentence summary of the candidate's expertise and background. Also, based on their skills and experience, give them a rating out of 10 
 on whether they would do good on the employer's project / ideal candidate. Write a short summary of why or why not with specific references to their experience (or lack of). 
 
 Format the output in the following format, so that it can be extracted at an frontend website for display.
+=======
+Write a concise, two-to-three‑sentence summary of their expertise and background. Also write one to two sentences on the project they made.
+>>>>>>> 4969200e91385f1ccf45ff213a465ae44b33fc08
 """
 
 def call_gemini(projects_text: str) -> str:

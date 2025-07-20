@@ -219,7 +219,7 @@ export default function SearchPage() {
                   <div className="text-center">
                     <Button
                       type="submit"
-                      size="lg"
+                      
                       className="bg-gradient-to-r from-[hsl(195,100%,50%)] to-[hsl(158,64%,52%)] text-[hsl(222,84%,5%)] px-12 py-4 text-lg font-bold hover:scale-105 transition-transform"
                     >
                       <Search className="h-5 w-5 mr-2" />

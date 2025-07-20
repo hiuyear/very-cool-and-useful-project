@@ -1,8 +1,8 @@
 {
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
@@ -14,5 +14,12 @@
     "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "lucide-react": "^0.525.0",
+    "react-hook-form": "^7.60.0",
+    "wouter": "^3.7.1",
+    "zod": "^4.0.5"
   }
 }
