@@ -12,19 +12,19 @@ mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log("MongoDB connected"))
-.catch((err) => console.error("MongoDB error:", err));
+.then(() => console.log("✅ MongoDB connected"))
+.catch((err) => console.error("❌ MongoDB error:", err));
 
-// Define Project schema/model (adjust fields as needed)
+// Define Project schema/model
 const ProjectSchema = new mongoose.Schema({}, { strict: false });
 const Project = mongoose.model("Project", ProjectSchema);
 
 // Express app setup
 const app = express();
 app.use(cors());
-app.use(express.json()); // Parse JSON body
+app.use(express.json());
 
-// Compatibility scoring function (example only — replace with real logic)
+// Compatibility scoring
 function calculateCompatibility(filters, project) {
   let score = 0;
   if (!filters || !project) return score;
@@ -41,19 +41,17 @@ function calculateCompatibility(filters, project) {
   return score;
 }
 
-// POST /api/developers
 app.post("/api/developers", async (req, res) => {
   try {
     const { prompt, tools } = req.body;
 
-    // 1) Call Flask to extract filters
-    const { data: fbData } = await axios.post("http://localhost:5000/findhacker", {
-      prompt,
-      tools,
-    });
+    // Step 1: Call Flask to extract filters
+    console.log("→ Calling Flask /findhacker...");
+    const { data: fbData } = await axios.post("http://127.0.0.1:5001/findhacker", { prompt, tools });
     const filters = Array.isArray(fbData) ? fbData[0] : fbData;
+    console.log("✓ Filters received:", filters);
 
-    // 2) Get all projects and calculate compatibility
+    // Step 2: Get and score projects
     const allProjects = await Project.find().lean();
     const scored = allProjects
       .map(p => ({ project: p, compatibility: calculateCompatibility(filters, p) }))
@@ -61,7 +59,7 @@ app.post("/api/developers", async (req, res) => {
       .sort((a, b) => b.compatibility - a.compatibility)
       .slice(0, 10);
 
-    // 3) Convert projects to developers
+    // Step 3: Convert to developers
     const seen = new Set();
     const developers = scored.flatMap(({ project, compatibility }) => {
       const members = project.team_members || [];
@@ -92,41 +90,55 @@ app.post("/api/developers", async (req, res) => {
         });
     });
 
-    // 4) Call /summarizeCandidates to get summaries
+    // Step 4: Summarize developers
     const summaryRows = developers.map(dev => [
       dev.name,
       ...dev.projectHighlights.map(h => h.title)
     ]);
-    const { data: summaries } = await axios.post("http://localhost:5000/summarizeCandidates", {
+
+    console.log("→ Calling Flask /summarizeCandidates...");
+    const { data: summaries } = await axios.post("http://127.0.0.1:5001/summarizeCandidates", {
       data: summaryRows,
     });
+    console.log("✓ Summaries received.");
+
     const summaryMap = new Map(summaries.map(s => [s.name, s.detailedSummary]));
 
-    // 5) Enrich developers with GitHub/LinkedIn from profile scraper
+    // Step 5: Scrape profiles
     await Promise.all(developers.map(async dev => {
       dev.detailedSummary = summaryMap.get(dev.name) || "";
       try {
+        console.log(`→ Scraping profile for ${dev.name}`);
         const { data: profileInfo } = await axios.get(
-          `http://localhost:5000/profile?url=${encodeURIComponent(dev.profile)}`
+          `http://127.0.0.1:5001/profile?url=${encodeURIComponent(dev.profile)}`
         );
         dev.githubUrl = profileInfo.github || "";
         dev.linkedinUrl = profileInfo.linkedin || "";
         dev.location = profileInfo.location || null;
       } catch (err) {
-        console.warn("Profile scrape failed for", dev.profile, err.message);
+        console.warn("⚠️ Profile scrape failed for", dev.profile, err.message);
       }
     }));
 
-    // 6) Respond
+    // Step 6: Respond
     res.json(developers);
+
   } catch (err) {
-    console.error("Error in /api/developers:", err);
+    console.error("❌ Error in /api/developers:", err.message);
+    if (err.response) {
+      console.error("↪ Status:", err.response.status);
+      console.error("↪ Data:", err.response.data);
+      return res.status(err.response.status).json({
+        error: `Flask responded with ${err.response.status}`,
+        details: err.response.data
+      });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
-// Start server
+// Start Express
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Express server running on http://localhost:${PORT}`);
+  console.log(`🚀 Express server running on http://localhost:${PORT}`);
 });
