@@ -8,7 +8,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-MONGO_URI = os.getenv("MONGO_URI") or "mongodb+srv://..."
+MONGO_URI = os.getenv("MONGO_URI") 
 client = MongoClient(MONGO_URI)
 db = client.get_database("devpost")
 projects_col = db.get_collection("projects")
