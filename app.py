@@ -3,6 +3,7 @@ from flask_cors import CORS
 from pymongo import MongoClient
 import os
 import json
+from dotenv import load_dotenv
 
 # === Setup ===
 app = Flask(__name__)
@@ -10,11 +11,12 @@ CORS(app)
 
 MONGO_URI = os.getenv("MONGO_URI") or "mongodb+srv://..."
 client = MongoClient("mongodb+srv://Joshuabehinayin:WAchzAWbMa0tLE1W@devpostdatabase.nlofybh.mongodb.net/?retryWrites=true&w=majority&appName=devpostDatabase")
+
 db = client.get_database("devpost")
 projects_col = db.get_collection("projects")
 
 seen_candidates = set()  # Store candidate profile URLs we've already processed
-
+git
 # === Compatibility Scoring ===
 def calculate_compatibility(employer_filters, project_doc):
     # Handle case where employer_filters might be a list or dict

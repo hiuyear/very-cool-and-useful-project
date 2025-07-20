@@ -8,14 +8,18 @@ import os
 
 load_dotenv(dotenv_path="../.env.local")
 
-GEMINI_API_KEY = os.getenv("VITE_API_GEMINI_KEY")
+GEMINI_API_KEY = "AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 class hackerData(BaseModel):
     category: list[str]
     technical: list[str]  
+<<<<<<< HEAD
     location: str | None  # Updated to allow None explicitly
+=======
+    location: str
+>>>>>>> 0b25400e6c3e5ad7710a59c28054bd9998e97c40
 
 # === Gemini Prompt Template ===
 PROMPT_TEMPLATE = """
@@ -81,7 +85,11 @@ def generate_keywords(refinedPrompt):
 
 
 app = Flask(__name__)
+<<<<<<< HEAD
 CORS(app, origins=["https://very-cool-and-useful-project.vercel.app", "http://localhost:5005"])
+=======
+CORS(app, origins=["https://very-cool-and-useful-project.vercel.app", "http://localhost:5173/"])
+>>>>>>> 0b25400e6c3e5ad7710a59c28054bd9998e97c40
 
 
 @app.route("/findHacker", methods=['POST'])
@@ -109,6 +117,7 @@ def findHacker():
         raw_text = response.text
         print("Raw Gemini response:", repr(raw_text))
 
+<<<<<<< HEAD
         # response.parsed returns a single hackerData object, not a list
         parsed_data: hackerData = response.parsed
         print("Parsed data:", parsed_data)
@@ -122,3 +131,14 @@ def findHacker():
 
 if __name__ == "__main__":
     app.run(debug=True)
+=======
+    info: list[hackerData] = response.parsed
+
+
+    # Serialize parsed Pydantic models to list of dicts and return JSON response
+    return jsonify([info.model_dump() for r in info])
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+>>>>>>> 0b25400e6c3e5ad7710a59c28054bd9998e97c40
