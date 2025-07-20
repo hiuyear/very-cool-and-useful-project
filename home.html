@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo</title>
+</head>
+<body>
+    
+    <input type="text" id="prompt">
+    <input type= "text" id="tools">
+    <div id="res"></div>
+    <button onclick="find()">Click Me</button>
+
+    <script>
+        
+            
+            
+            function find()
+            {
+
+            const inputPrompt=document.getElementById("prompt").value;
+            const inputTools=document.getElementById("tools").value;
+            fetch("/findHacker",{
+                method:"POST",
+                headers: {
+                    "Content-Type":"application/json"
+                },
+
+                body: JSON.stringify({prompt: inputPrompt, tools: inputTools})
+
+            })
+                .then(response => {
+                    if(!response.ok){
+                        return response.json().then(data=>{
+                            throw new Error(data.error);
+                        })
+                        
+                    }
+
+                return response.json();
+                })
+                
+                
+                .then(data => 
+                    {
+                        
+                        console.log("Printing Info");
+                        document.getElementById("res").innerText=data[0].technical;
+                        
+                                      
+                    })
+
+                .catch(error=>{
+                    document.getElementById("prompt").innerText=error.message;
+                })
+            }
+    </script>
+
+</body>
+</html>
