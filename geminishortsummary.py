@@ -12,7 +12,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("Please set the GEMINI_API_KEY environment variable")
 
-MAX_CANDIDATES = https://chatgpt.com/gpts
+MAX_CANDIDATES = 10
 MAX_RETRIES = 2
 RETRY_BACKOFF_BASE = 0.5  # seconds
 
@@ -31,7 +31,10 @@ You are an expert career summarizer. You are going to recieve a list of informat
 You will also receive a short prompt from an employer about what candidate they are looking for / what projects they need help with.
 
 
-Write a concise, two-to-three‑sentence summary of their expertise and background.
+Write a concise, two-to-three‑sentence summary of the candidate's expertise and background. Also, based on their skills and experience, give them a rating out of 10 
+on whether they would do good on the employer's project / ideal candidate. Write a short summary of why or why not with specific references to their experience (or lack of). 
+
+Format the output in the following format, so that it can be extracted at an frontend website for display.
 """
 
 def call_gemini(projects_text: str) -> str:
@@ -99,11 +102,12 @@ def summarize_candidates():
         return jsonify({"error": err}), 400
 
     results = []
+    # Use a thread pool to parallelize API calls
     with ThreadPoolExecutor() as pool:
-        futures = {
-            pool.submit(summarize_candidate_cached, tuple(projects)): name
-            for name, projects in candidates
-        }
+        futures = {}
+        for name, projects in candidates:
+            proj_tuple = tuple(projects)
+            futures[ pool.submit(summarize_candidate_cached, proj_tuple) ] = name
 
         for fut in as_completed(futures):
             name = futures[fut]
@@ -112,24 +116,12 @@ def summarize_candidates():
             except Exception as e:
                 logger.exception("Failed summarizing %s", name)
                 summary = f"Error generating summary: {e}"
-
-            # <-- build the exact output object here -->
-            results.append({
-                "name":            name,
-                "detailedSummary": summary,
-                "githubUrl":       None,
-                "linkedinUrl":     None
-            })
+            results.append({"name": name, "summary": summary})
 
     logger.info("Generated %d summaries", len(results))
-<<<<<<< HEAD
     return jsonify({"summaries": results})
 
 
 if __name__ == "__main__":
     # In prod, run under Gunicorn/UWSGI behind nginx
     app.run(host="0.0.0.0", port=5002, debug=False)
-=======
-    # <-- return the bare list, not wrapped in {"summaries": ...} -->
-    return jsonify(results), 200
->>>>>>> 0b25400e6c3e5ad7710a59c28054bd9998e97c40
