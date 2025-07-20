@@ -8,7 +8,7 @@ import os
 
 load_dotenv(dotenv_path=".env.local")
 
-GEMINI_API_KEY = os.getenv("VITE_API_GEMINI_KEY")
+GEMINI_API_KEY = "AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 

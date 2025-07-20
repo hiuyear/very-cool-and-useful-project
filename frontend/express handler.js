@@ -35,7 +35,7 @@ app.post("/api/developers", async (req, res) => {
             matchScore:       compatibility,
             projectDate:      "Recent",
 
-            projects:         1,
+            projects:         projectHighlights.length,
             rating:           compatibility,
 
             skills:           project.built_with || [],
