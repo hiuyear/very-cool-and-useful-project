@@ -1,18 +1,21 @@
-
-from flask import Flask, jsonify, request, send_from_directory
-from flask_cors import CORS
+from flask import Flask, jsonify, send_from_directory, request
 from google import genai
-import os
+from flask_cors import CORS
 import json
+from pydantic import BaseModel
+from dotenv import load_dotenv
+import os
 
-# === Flask App Setup ===
-app = Flask(__name__)
-CORS(app)
+load_dotenv(dotenv_path="../.env.local")
 
-# === Configure Gemini ===
-GEMINI_API_KEY="AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+GEMINI_API_KEY = os.getenv("VITE_API_GEMINI_KEY")
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+class hackerData(BaseModel):
+    category: list[str]
+    technical: list[str]  
+    location: str | None  # Updated to allow None explicitly
 
 # === Gemini Prompt Template ===
 PROMPT_TEMPLATE = """
@@ -36,14 +39,14 @@ Rules:
 - Use lowercase for all strings. No duplicates.
 - If no location is mentioned in the prompt, return: "location": null
 - If the prompt is vague, try your best to infer categories/skills based on typical use cases.
-- Match terminology to what a developer might include in a Devpost project: real frameworks, libraries, stacks, or skills (e.g. “react”, “python”, “llm fine-tuning”, not vague phrases like “communication”)
+- Match terminology to what a developer might include in a Devpost project: real frameworks, libraries, stacks, or skills (e.g. "react", "python", "llm fine-tuning", not vague phrases like "communication")
 
 Return ONLY a valid Python dictionary (no extra commentary or explanation).
 
 EXAMPLES:
 
 Example 1:
-Prompt: "We\’re looking for someone to help us build a climate dashboard using Next.js, Tailwind, and MongoDB. Based in Vancouver."
+Prompt: "We're looking for someone to help us build a climate dashboard using Next.js, Tailwind, and MongoDB. Based in Vancouver."
 
 Selected tools: ["Next.js", "Tailwind"]
 
@@ -55,7 +58,7 @@ Expected Output:
 }
 
 Example 2:
-Prompt: "We\’re prototyping an AI assistant to help HR teams with resume screening. The ideal candidate has experience with LangChain, OpenAI, and Pinecone."
+Prompt: "We're prototyping an AI assistant to help HR teams with resume screening. The ideal candidate has experience with LangChain, OpenAI, and Pinecone."
 
 Selected tools: ["LangChain", "OpenAI", "Pinecone"]
 
@@ -69,35 +72,53 @@ Expected Output:
 Now generate the structured dictionary for:
 """
 
-# === Gemini Execution Function ===
-def generate_keywords(prompt: str, tools: list):
-    full_prompt = (
-        f"{PROMPT_TEMPLATE}\n"
-        f"Prompt: {prompt}\n"
-        f"Selected tools: {tools}"
+def generate_keywords(refinedPrompt):
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=refinedPrompt,
     )
+    return response.text
 
-    try:
-        response = model.generate_content(full_prompt)
-        print("Gemini raw response:", response.text)
-        return eval(response.text)
-    except Exception as e:
-        print("Gemini parsing error:", e)
-        return {"error": "Failed to parse Gemini output", "raw": response.text}
 
-# === Flask Routes ===
-@app.route("/")
-def home():
-    return send_from_directory('.', "search.html")
+app = Flask(__name__)
+CORS(app, origins=["https://very-cool-and-useful-project.vercel.app", "http://localhost:5005"])
+
 
 @app.route("/findHacker", methods=['POST'])
-def find_hacker():
+def findHacker():
     data = request.get_json()
-    user_prompt = data.get("prompt", "")
-    selected_tools = data.get("tools", [])
+    userPrompt = data.get("prompt", "")
+    selectedTools = data.get("tools", [])
 
-    result = generate_keywords(user_prompt, selected_tools)
-    return jsonify(result)
+    print("User prompt:", userPrompt)
+    print("Selected tools:", selectedTools)
+
+    # Build prompt correctly with PROMPT_TEMPLATE contents + user input
+    refinedPrompt = f"{PROMPT_TEMPLATE}\nNatural language prompt: {userPrompt}\nSelected checkboxes: {selectedTools}"
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=refinedPrompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": hackerData
+            }
+        )
+        
+        raw_text = response.text
+        print("Raw Gemini response:", repr(raw_text))
+
+        # response.parsed returns a single hackerData object, not a list
+        parsed_data: hackerData = response.parsed
+        print("Parsed data:", parsed_data)
+        
+        # Return the single object wrapped in an array to match frontend expectations
+        return jsonify([parsed_data.model_dump()])
+        
+    except Exception as e:
+        print(f"Error processing request: {e}")
+        return jsonify({"error": "Failed to process request"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

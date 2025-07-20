@@ -45,7 +45,7 @@ export function DeveloperModal({ developer, open, onClose }: DeveloperModalProps
 
         <div className="space-y-8">
           {/* Stats Grid */}
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-[hsl(222,84%,5%)] rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-[hsl(158,64%,52%)]">
                 {developer.projects}
@@ -53,22 +53,10 @@ export function DeveloperModal({ developer, open, onClose }: DeveloperModalProps
               <div className="text-gray-400">Total Projects</div>
             </div>
             <div className="bg-[hsl(222,84%,5%)] rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-[hsl(45,93%,47%)]">
-                {developer.experience}
-              </div>
-              <div className="text-gray-400">Experience</div>
-            </div>
-            <div className="bg-[hsl(222,84%,5%)] rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-[hsl(195,100%,50%)]">
                 {developer.rating}
               </div>
               <div className="text-gray-400">Rating</div>
-            </div>
-            <div className="bg-[hsl(222,84%,5%)] rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-white">
-                {developer.hourlyRate || "$85/hr"}
-              </div>
-              <div className="text-gray-400">Rate</div>
             </div>
           </div>
 

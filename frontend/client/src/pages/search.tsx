@@ -38,7 +38,7 @@ export default function SearchPage() {
 
     try {
       // Step 1: Call Gemini Flask backend to get extracted filters
-      const response = await fetch("http://localhost:5000/findHacker", {
+      const response1 = await fetch("http://localhost:5000/findHacker", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,8 +49,38 @@ export default function SearchPage() {
         }),
       });
 
-      const aiFilters = await response.json();
+      const aiFilters = await response1.json();
       console.log("Gemini filters:", aiFilters);
+
+      // Step 2: Save everything to localStorage
+      localStorage.setItem(
+        "searchQuery",
+        JSON.stringify({
+          ...searchData,
+          filters: aiFilters,
+        })
+      );
+    
+      
+      try {
+      // Step 3: Pass filters python app.py
+      const response2 = await fetch("http://localhost:5001/match", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filters: aiFilters,
+        }),
+      });
+
+    
+    const matchResults = await response2.json();
+    console.log("Match results:", matchResults);
+}   catch (err) {
+    console.error("Error during fetch sequence:", err);
+}
+      
 
       // Step 2: Save everything to localStorage
       localStorage.setItem(
