@@ -58,12 +58,24 @@ export function DeveloperCard({ developer, onClick }: DeveloperCardProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 mb-4">
+      <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="text-center">
           <div className="text-lg font-bold text-[hsl(158,64%,52%)]">
             {developer.projects}
           </div>
           <div className="text-xs text-gray-400">Projects</div>
+        </div>
+        <div className="text-center">
+          <div className="text-lg font-bold text-[hsl(45,93%,47%)]">
+            {developer.experience}
+          </div>
+          <div className="text-xs text-gray-400">Experience</div>
+        </div>
+        <div className="text-center">
+          <div className="text-lg font-bold text-white">
+            {developer.hourlyRate || "$85/hr"}
+          </div>
+          <div className="text-xs text-gray-400">Rate</div>
         </div>
       </div>
 
