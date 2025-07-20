@@ -77,6 +77,15 @@ export default function SearchPage() {
     
     const matchResults = await response2.json();
     console.log("Match results:", matchResults);
+
+ 
+  // Save matchResults in localStorage for retrieval in /results page
+  localStorage.setItem("matchResults", JSON.stringify(matchResults));
+
+// Navigate to results page
+navigate("/results");
+
+    
 }   catch (err) {
     console.error("Error during fetch sequence:", err);
 }
