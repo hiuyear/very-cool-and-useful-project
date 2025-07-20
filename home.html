@@ -13,15 +13,12 @@
     <button onclick="find()">Click Me</button>
 
     <script>
-        
-            
-            
             function find()
             {
 
             const inputPrompt=document.getElementById("prompt").value;
             const inputTools=document.getElementById("tools").value;
-            fetch("/findHacker",{
+            fetch("/findhacker",{
                 method:"POST",
                 headers: {
                     "Content-Type":"application/json"
@@ -29,8 +26,7 @@
 
                 body: JSON.stringify({prompt: inputPrompt, tools: inputTools})
 
-            })
-                .then(response => {
+            }).then(response => {
                     if(!response.ok){
                         return response.json().then(data=>{
                             throw new Error(data.error);
