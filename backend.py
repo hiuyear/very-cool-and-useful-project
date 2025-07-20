@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, send_from_directory, request
+from flask_cors import CORS
 from google import genai
 import json
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ class hackerData(BaseModel):
     technical: list[str]   # fixed typo here
     location: str
 
+# === Gemini Prompt Template ===
 PROMPT_TEMPLATE = """
 You are an AI assistant helping a recruiter search for ideal candidates.
 
@@ -76,23 +78,16 @@ def generate_keywords(refinedPrompt):
         contents=refinedPrompt,
     )
     return response.text
-def parse_markdown_json(text):
-    # Strip markdown-style code block
-    if text.startswith("```json"):
-        text = text[len("```json"):].strip()
-    if text.endswith("```"):
-        text = text[:-3].strip()
 
-    # Now safely parse JSON
-    return json.loads(text)
 
 app = Flask(__name__)
+CORS(app, origins=["https://very-cool-and-useful-project.vercel.app", "http://localhost:5173/"])
 
 @app.route("/")
 def home():
     return send_from_directory('.', "home.html")
 
-@app.route("/findhacker", methods=['POST'])
+@app.route("/findHacker", methods=['POST'])
 def findHacker():
     data = request.get_json()
     userPrompt = data.get("prompt", "")
@@ -115,9 +110,9 @@ def findHacker():
 
     info: list[hackerData] = response.parsed
 
+
     # Serialize parsed Pydantic models to list of dicts and return JSON response
-    return jsonify(info.model_dump())
-    
+    return jsonify([info.model_dump() for r in info])
 
 if __name__ == "__main__":
     app.run(debug=True)
