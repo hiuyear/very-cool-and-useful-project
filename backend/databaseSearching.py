@@ -92,7 +92,7 @@ print(gemini_prompt)
 from pymongo import MongoClient
 from typing import Dict, List, Optional
 import logging
-from backend import sendData
+from backend.prompt_breakdown import sendData
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

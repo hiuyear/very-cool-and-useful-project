@@ -1,21 +1,20 @@
-from flask import Flask, jsonify, send_from_directory, request
+
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 from google import genai
-import json
-from pydantic import BaseModel
-from dotenv import load_dotenv
 import os
+import json
 
-load_dotenv(dotenv_path=".env.local")
+# === Flask App Setup ===
+app = Flask(__name__)
+CORS(app)
 
-GEMINI_API_KEY = os.getenv("VITE_API_GEMINI_KEY")
+# === Configure Gemini ===
+GEMINI_API_KEY="AIzaSyDHF546OTqCAr0zRvSha_HmOYUONMagoVE"
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-client = genai.Client(api_key=GEMINI_API_KEY)
-
-class hackerData(BaseModel):
-    category: list[str]
-    technical: list[str]   # fixed typo here
-    location: str
-
+# === Gemini Prompt Template ===
 PROMPT_TEMPLATE = """
 You are an AI assistant helping a recruiter search for ideal candidates.
 
@@ -70,54 +69,35 @@ Expected Output:
 Now generate the structured dictionary for:
 """
 
-def generate_keywords(refinedPrompt):
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=refinedPrompt,
+# === Gemini Execution Function ===
+def generate_keywords(prompt: str, tools: list):
+    full_prompt = (
+        f"{PROMPT_TEMPLATE}\n"
+        f"Prompt: {prompt}\n"
+        f"Selected tools: {tools}"
     )
-    return response.text
-def parse_markdown_json(text):
-    # Strip markdown-style code block
-    if text.startswith("```json"):
-        text = text[len("```json"):].strip()
-    if text.endswith("```"):
-        text = text[:-3].strip()
 
-    # Now safely parse JSON
-    return json.loads(text)
+    try:
+        response = model.generate_content(full_prompt)
+        print("Gemini raw response:", response.text)
+        return eval(response.text)
+    except Exception as e:
+        print("Gemini parsing error:", e)
+        return {"error": "Failed to parse Gemini output", "raw": response.text}
 
-app = Flask(__name__)
-
+# === Flask Routes ===
 @app.route("/")
 def home():
-    return send_from_directory('.', "home.html")
+    return send_from_directory('.', "search.html")
 
-@app.route("/findhacker", methods=['POST'])
-def findHacker():
+@app.route("/findHacker", methods=['POST'])
+def find_hacker():
     data = request.get_json()
-    userPrompt = data.get("prompt", "")
-    selectedTools = data.get("tools", [])
+    user_prompt = data.get("prompt", "")
+    selected_tools = data.get("tools", [])
 
-    print(userPrompt)
-
-    # Build prompt correctly with PROMPT_TEMPLATE contents + user input
-    refinedPrompt = f"{PROMPT_TEMPLATE}\nNatural language prompt: {userPrompt}\nSelected checkboxes: {selectedTools}"
-
-    response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=refinedPrompt,
-    config={
-        "response_mime_type": "application/json",
-        "response_schema": hackerData}
-    )
-    raw_text = response.text
-    print("Raw Gemini response:", repr(raw_text))
-
-    info: list[hackerData] = response.parsed
-
-    # Serialize parsed Pydantic models to list of dicts and return JSON response
-    return jsonify(info.model_dump())
-    
+    result = generate_keywords(user_prompt, selected_tools)
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(debug=True)

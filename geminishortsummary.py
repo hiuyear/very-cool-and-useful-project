@@ -27,10 +27,14 @@ logger = logging.getLogger(__name__)
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 SUMMARY_PROMPT = """
-You are an expert career summarizer. You are going to recieve information on a candidate with information such as their projects and names of them.
+You are an expert career summarizer. You are going to recieve a list of information on a candidate with information such as their projects and names of them.
+You will also receive a short prompt from an employer about what candidate they are looking for / what projects they need help with.
 
 
-Write a concise, two-to-three‑sentence summary of their expertise and background.
+Write a concise, two-to-three‑sentence summary of the candidate's expertise and background. Also, based on their skills and experience, give them a rating out of 10 
+on whether they would do good on the employer's project / ideal candidate. Write a short summary of why or why not with specific references to their experience (or lack of). 
+
+Format the output in the following format, so that it can be extracted at an frontend website for display.
 """
 
 def call_gemini(projects_text: str) -> str:
