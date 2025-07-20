@@ -92,7 +92,7 @@ print(gemini_prompt)
 from pymongo import MongoClient
 from typing import Dict, List, Optional
 import logging
-from backend.py import
+from backend import sendData
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -271,12 +271,8 @@ if __name__ == "__main__":
     DB_NAME = "devpost"
     COLLECTION_NAME = "projects"
     
-    # Example keywords (would normally come from Gemini analysis)
-    KEYWORDS = {
-        "tools_frameworks": ["android-studio", "supabase", "google-maps", "flask"],
-        "skills_capabilities": ["real-time", "chat", "authentication", "push notifications"],
-        "domains": ["social network", "mental health", "education", "productivity"]
-    }
+    #gemini keywords
+    KEYWORDS = sendData()
 
     # Initialize and run
     try:
