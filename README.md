@@ -1,2 +1,1 @@
-# very-cool-and-useful-project
-yippeeeeee
+# project for Hackthe6ix 2025, July
